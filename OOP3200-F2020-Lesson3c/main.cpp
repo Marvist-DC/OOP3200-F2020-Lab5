@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <windows.h>
 
 #include "Vector2D.h"
 
@@ -23,9 +24,12 @@ int main()
 		std::map<std::string, Vector2D<int>*> pointObject;
 
 		std::string pointName;			// String to hold the name of the point
-		int x;						// Holds the x value
-		int y;						// Holds the y value
+		int x;							// Holds the x value
+		int y;							// Holds the y value
 		float totalDistance = 0.0f;		// Hold the total distance between all points
+
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		
 
 		/******************************************************************************
 		 *	Reading Labels/Points into the Map:
@@ -97,17 +101,24 @@ int main()
 		 // For loop will iterate through all points and calculate the total distance between them all
 		for (auto itr = pointObject.begin(); /*check for condition inside the loop to avoid dereferencing end() pointer*/; ++itr)
 		{
+			// Declaring a temporary pointer and incrementing it
 			auto tempItr = itr;
 			++tempItr;
+
+			// Check to see if the temporary pointer is equal to pointObject.end()
+			// If it is, break the loop
 			if (tempItr == pointObject.end())
 			{
 				break;
 			}
+
+			// Calculate distance
 			auto distance = Vector2D<int>::Distance(*(itr->second), *(std::next(itr)->second));
 			totalDistance += distance;
 		}
 
-		std::cout << "The map contains " << pointObject.size() << " and a total distance of " << totalDistance << std::endl << std::endl;
+		// Display information about the map and points to the user
+		std::cout << "The map contains " << pointObject.size() << " points and a total distance of " << totalDistance << std::endl << std::endl;
 
 		/******************************************************************************
 		 *	Determine the Distance Between the Start Point and a User Selected Point:
@@ -118,28 +129,38 @@ int main()
 		 *	Otherwise, tell the user that the label they entered is not in the map.
 		 *	Repeat these steps until the user enters "quit".
 		 ******************************************************************************/
+
+		// While loop will break only when the user types "quit"
 		while (true)
 		{
 			std::string input;
 			std::cout << "Enter the label of the point you wish to go to (\"quit\" to end): ";
+			SetConsoleTextAttribute(hConsole, 14);		// Set text colour to yellow
 			std::cin >> input;
+			SetConsoleTextAttribute(hConsole, 15);		// Set text colour to white
+
+			// If quit is typed end the loop
 			if (input == "quit")
 			{
 				break;
 			}
+			
+			// Iterate and find the point the user requested
+			auto itr = pointObject.find(input);
+
+			// If a point is not found let the user know
+			if (itr == pointObject.end())
+			{
+				std::cout << "There is no point labeled \"" << input << "\" in the map." << std::endl << std::endl;
+			}
+
+			// Otherwise, do the math and calculate the distance to the user specified point
 			else
 			{
-				auto itr = pointObject.find(input);
-				if (itr == pointObject.end())
-				{
-					std::cout << "There is no point labeled \"" << input << "\" in the map." << std::endl << std::endl;
-				}
-				else
-				{
-					auto distance = Vector2D<int>::Distance(*(pointObject["AA"]), *(itr->second));
-					std::cout << "The distance between AA (0, 0) and " << itr->first << *(itr->second) << " is " << distance << std::endl << std::endl;
-				}
+				auto distance = Vector2D<int>::Distance(*(pointObject["AA"]), *(itr->second));
+				std::cout << "The distance between AA (0, 0) and " << itr->first << *(itr->second) << " is " << distance << std::endl << std::endl;
 			}
+			
 		}
 	}
 	/******************************************************************************
