@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
-#include <windows.h>
+#include <Windows.h>
 
 #include "Vector2D.h"
 
